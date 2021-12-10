@@ -23,15 +23,32 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
+// POST SECTION
 
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   let id = generateRandomString();
   urlDatabase[id] = req.body.longURL;
   res.redirect(`/urls/${id}`);         // Respond with 'Ok' (we will replace this)
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  
+  delete urlDatabase[req.params.shortURL]
+  res.redirect("/urls")
+})
+
+app.post("/urls/:shortURL", (req, res) => {
+  
+  urlDatabase[req.params.shortURL] = req.body.longURL
+  res.redirect("/urls")
+})
+
+
+// GET SECTION
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
 });
 
 app.get("/urls", (req, res) => {
@@ -51,8 +68,8 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   // const longURL = ...
-  const longURL = urlDatabase[req.params.id]
-  console.log(req.params.id)
+  const longURL = urlDatabase[req.params.shortURL]
+  console.log(req.params.shortURL)
   res.redirect(longURL);
 });
 
@@ -61,16 +78,14 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
