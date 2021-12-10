@@ -16,8 +16,7 @@ function generateRandomString() {
   return result;
 }
 
-
-app.set("viewengine", "ejs");
+app.set("view engine", "ejs");
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -31,6 +30,9 @@ app.get("/", (req, res) => {
 app.post("/urls", (req, res) => {
   console.log(req.body);  // Log the POST request body to the console
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let id = generateRandomString();
+  urlDatabase[id] = req.body.longURL;
+  console.log(urlDatabase)
 });
 
 app.get("/urls", (req, res) => {
