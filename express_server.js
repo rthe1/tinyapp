@@ -4,17 +4,9 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const PORT = 8080;
 
-function generateRandomString() {
-  randString = '';
-  let result = '';
-  x=0
-  while (x < 6) {
-    randString = Math.floor(Math.random() * 9)  
-    result += randString
-    x++;
-  }
-  return result;
-}
+const generateRandomString = () => {
+  return Math.random().toString(36).substring(2, 8);
+};
 
 app.set("view engine", "ejs");
 
@@ -22,6 +14,19 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const userDatabase = { 
+  "admin": {
+    id: "admin", 
+    email: "1@1.com", 
+    password: "123"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 // POST SECTION
 
@@ -44,6 +49,22 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls")
 })
 
+app.post("/register", (req, res) => {
+  const id = generateRandomString()
+  const email = req.body.email;
+  const password = req.body.password;
+
+  userDatabase[id] = { 
+    id:id,
+     email:email, 
+     password:password };
+
+  res.redirect("/urls")
+})
+
+
+
+
 
 // GET SECTION
 
@@ -52,8 +73,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  
+  const templateVars = {};
   res.render("register", templateVars)
+});
+
+app.get("/login", (req, res) => {
+  const templateVars = {};
+  res.render("login", templateVars)
 });
 
 app.get("/urls", (req, res) => {
