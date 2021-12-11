@@ -1,7 +1,12 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
+const cookieSession = require("cookie-session");
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieSession({
+  name: 'session',
+  keys: ['key1', 'key2']
+}))
 const PORT = 8080;
 
 const generateRandomString = () => {
@@ -15,15 +20,15 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const userDatabase = { 
+const userDatabase = {
   "admin": {
-    id: "admin", 
-    email: "1@1.com", 
+    id: "admin",
+    email: "1@1.com",
     password: "123"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 }
@@ -38,28 +43,33 @@ app.post("/urls", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  
+
   delete urlDatabase[req.params.shortURL]
   res.redirect("/urls")
 })
 
 app.post("/urls/:shortURL", (req, res) => {
-  
+
   urlDatabase[req.params.shortURL] = req.body.longURL
   res.redirect("/urls")
 })
 
 app.post("/register", (req, res) => {
+
   const id = generateRandomString()
   const email = req.body.email;
   const password = req.body.password;
 
-  userDatabase[id] = { 
-    id:id,
-     email:email, 
-     password:password };
+  userDatabase[id] = {
+    id: id,
+    email: email,
+    password: password
+  };
+
+  req.session.user_id = id;
 
   res.redirect("/urls")
+
 })
 
 
@@ -73,28 +83,35 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {};
+  const templateVars = {
+    user: userDatabase[req.session.user_id],
+  };
   res.render("register", templateVars)
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = {};
+  const templateVars = {
+    user: userDatabase[req.session.user_id],
+  };
   res.render("login", templateVars)
 });
 
+
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  console.log(req.session.user_id)
+  const templateVars = {
+    urls: urlDatabase,
+    user: userDatabase[req.session.user_id],
+  };
+
   res.render("urls_index", templateVars);
 });
 
-app.get("/hello", (req, res) => {
-  const templateVars = { greeting: 'Hello World!' };
-  res.render("hello_world", templateVars);
-});
-
-
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    user: userDatabase[req.session.user_id],
+  };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -105,16 +122,12 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = { shortURL: req.params.shortURL, longURL:  urlDatabase[req.params.shortURL]};
+  const templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user: userDatabase[req.session.user_id],
+  };
   res.render("urls_show", templateVars);
-});
-
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.listen(PORT, () => {
