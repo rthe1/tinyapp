@@ -7,6 +7,8 @@ app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }))
+const bcrypt = require('bcryptjs');
+
 const PORT = 8080;
 
 const generateRandomString = () => {
@@ -36,7 +38,7 @@ const userDatabase = {
   "admin": {
     id: "admin",
     email: "1@1.com",
-    password: "123"
+    password: "$2a$10$c6yLtCtF828CiwmG0LX1Kua.EHY2b61eJAkHhxy6yao2Nc1gZcone"
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -86,8 +88,10 @@ app.post("/register", (req, res) => {
   userDatabase[id] = {
     id: id,
     email: email,
-    password: password
+    password: bcrypt.hashSync(password, 10)
   };
+
+
 
 
   req.session.user_id = id;
@@ -102,9 +106,16 @@ app.post('/login', (req, res) => {
 
   const user = checkEmail(email);
 
+
   if (!user) {
     return res.status(403).send("User Does Not Exist")
   }
+
+  if (!bcrypt.compareSync(password, user.password)) {
+    return res.status(403).send('Password Is Incorrect!')
+  }
+
+  req.session.user_id = user.id;
 
   res.redirect("/urls");
 })
