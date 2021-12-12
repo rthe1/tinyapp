@@ -27,11 +27,29 @@ const checkEmail = (email) => {
   return false;
 }
 
+const urlsForUsers = (database, id) => {
+  let output = {};
+  for (const shortURL in database) {
+    if (database[shortURL].userID === id) {
+      output[shortURL] = database[shortURL]
+
+    }
+
+  } 
+return output
+};
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "admin"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
 
 const userDatabase = {
@@ -148,14 +166,24 @@ app.get("/login", (req, res) => {
   const templateVars = {
     user: userDatabase[req.session.user_id],
   };
+
+
   res.render("login", templateVars)
 });
 
 
 app.get("/urls", (req, res) => {
+
+
+
+
+  if (!req.session.user_id) {
+    res.redirect("/login");
+  }
+
   console.log(req.session.user_id)
   const templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUsers(urlDatabase, req.session.user_id),
     user: userDatabase[req.session.user_id],
   };
 
@@ -163,6 +191,10 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  if (!req.session.user_id) {
+    res.redirect("/login");
+  }
+
   const templateVars = {
     user: userDatabase[req.session.user_id],
   };
@@ -171,12 +203,21 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   // const longURL = ...
-  const longURL = urlDatabase[req.params.shortURL]
+
+  const longURL = urlDatabase[req.params.shortURL].longURL
   console.log(req.params.shortURL)
   res.redirect(longURL);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const isAuthourized = urlDatabase[shortURL].userID === req.session.user_id;
+
+
+  if (!req.session.user_id || !isAuthourized) {
+    res.redirect("/login");
+  }
+
+  
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
