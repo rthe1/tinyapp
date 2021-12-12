@@ -5,8 +5,8 @@ It was made for Lighthouse Labs' [Web Development Bootcamp](https://www.lighthou
 
 ## Final Product
 
-!["URLs page"]()
-!["Edit page for each URL"]()
+!["URLs page"](https://github.com/rthe1/tinyapp/blob/master/pictures/Screenshot%20from%202021-12-12%2018-44-53.png)
+!["Edit page for each URL"](https://github.com/rthe1/tinyapp/blob/master/pictures/Screenshot%20from%202021-12-12%2018-45-17.png)
 
 ## Dependencies
 
