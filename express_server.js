@@ -13,6 +13,18 @@ const generateRandomString = () => {
   return Math.random().toString(36).substring(2, 8);
 };
 
+const checkEmail = (email) => {
+
+  for (const user in userDatabase) {
+
+    if (email === userDatabase[user].email) {
+      return userDatabase[user]
+    }
+
+  }
+  return false;
+}
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -60,11 +72,23 @@ app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
 
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(403).send("Please Enter A UserName Or Password")
+  }
+
+  for (const user in userDatabase) {
+
+    if (email === userDatabase[user].email) {
+      return res.status(403).send("Email Provided Already Exists In Database Please Login")
+    }
+  }
+
   userDatabase[id] = {
     id: id,
     email: email,
     password: password
   };
+
 
   req.session.user_id = id;
 
@@ -72,6 +96,25 @@ app.post("/register", (req, res) => {
 
 })
 
+app.post('/login', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const user = checkEmail(email);
+
+  if (!user) {
+    return res.status(403).send("User Does Not Exist")
+  }
+
+  res.redirect("/urls");
+})
+
+app.post('/logout', (req, res) => {
+
+  delete req.session.user_id
+  res.redirect("/urls")
+
+})
 
 
 
@@ -86,6 +129,7 @@ app.get("/register", (req, res) => {
   const templateVars = {
     user: userDatabase[req.session.user_id],
   };
+
   res.render("register", templateVars)
 });
 
