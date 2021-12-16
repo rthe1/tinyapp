@@ -204,7 +204,7 @@ app.get("/urls", (req, res) => {
 
 
   if (!req.session.user_id) {
-    res.redirect("/login");
+    res.status(403).send("You gotta login or register sorry!")
   }
 
   console.log(req.session.user_id)
@@ -243,7 +243,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const isAuthourized = urlDatabase[req.params.shortURL].userID === req.session.user_id;
 
   if (!req.session.user_id || !isAuthourized) {
-    res.redirect("/urls");
+    res.status(403).send("You gotta login or register sorry!")
   }
 
   const templateVars = {
